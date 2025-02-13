@@ -1,6 +1,8 @@
 #include<iostream>
 #include<string>
 #include<vector>
+#include<fstream>
+#include<sstream>
 
 using namespace std;
 class Student
@@ -45,17 +47,22 @@ class Student
             }
         }
 
-        void printData(vector<Student> s, int num);
-        void getData(vector<Student> &s, int num);
-        void searchStudent(vector<Student> s, int num);
+        void printData();
+        void getData(int num);
+        void searchStudent();
 
 
 };
 
 
-void Student::getData(vector<Student> &s, int num)
+void Student::getData( int num)
 {
-
+    fstream fout;
+    fout.open("StudentData.txt",ios::app | ios::out | ios::in);
+    if(!fout)
+    {
+        cout<<"File failed to create!\n";
+    }
     Student stud;
     int rollno;
     string name;
@@ -67,8 +74,9 @@ void Student::getData(vector<Student> &s, int num)
     {
         cout<<"\nEnter the Rollno: ";
         cin>>rollno;
+        cin.ignore();
         cout<<"\nEnter the name: ";
-        cin>>name;
+        getline(cin, name);
         for(int i=0; i<3; i++)
         {
             cout<<"\nEnter marks of "<<subjects[i]<<" : ";
@@ -78,49 +86,66 @@ void Student::getData(vector<Student> &s, int num)
         stud.setName(name);
         stud.setRollno(rollno);
         stud.setSubjects(arr);
-        s.push_back(stud);
+
+        fout<<stud._rollno<<"\t"<<stud._name<<"\t\t\t"<<stud._subjects[0]<<"\t"<<stud._subjects[1]<<"\t"<<stud._subjects[2]<<endl;
+
 
         
     }
+    fout.close();
 
 }
 
 
 
-void Student::printData(vector<Student> s, int num)
+void Student::printData()
 {
-    for(int i=0; i<num;i++)
+    ifstream fin("StudentData.txt");
+    if(!fin.is_open())
     {
-    cout<<"\nRoll no: "<<s[i]._rollno;
-    cout<<"\nName :"<<s[i]._name;
-    cout<<"\nMarks: ";
-    for(int j=0; j<3; j++)
-    {
-        cout<<s[i]._subjects[j]<<" ";
+        cerr<<"Error opening the file!";
     }
-}
-}
-
-void Student::searchStudent(vector<Student> s, int num)
-{
-    int rollno;
-    cout<<"\Enter the roll no: ";
-    cin>>rollno;
-
-    for(int i=0; i<num; i++)
+    string record;
+    cout<<"Roll No"<<"\t"<<"Name"<<"\t\t\t"<<"Physics"<<"\t"<<"Chemistry"<<"\t"<<"Math\n";
+    while(getline(fin, record))
     {
-        if(s[i]._rollno == rollno)
+        cout<<record<<endl;
+    }
+
+    fin.close();
+    
+
+}
+
+void Student::searchStudent()
+{
+    string rollno;
+    cout<<"\nEnter the roll no: ";
+    cin>>rollno;
+    string line;
+    fstream fin("StudentData.txt");
+
+    if(!fin.is_open())
+    {
+        cout<<"Failed to Open the File!\n";
+    }else{
+        while(getline(fin,line))
         {
-            cout<<"\nName   : "<<s[i]._name;
-            cout<<"\nRoll no: "<<s[i]._rollno;
-            cout<<"\nMarks   : "<<endl;
-            cout<<"Physics     - "<<s[i]._subjects[0];
-            cout<<"\nChemistry - "<<s[i]._subjects[1];
-            cout<<"\nMath      - "<<s[i]._subjects[2];
-        }else{
-            cout<<"\nNo records!";
+            stringstream ss(line);
+            string word;
+            while(ss>>word)
+            {
+                if(word == rollno)
+                {
+                    cout<<line<<endl;
+                }
+                break;
+            }
+
         }
     }
+    fin.close();
+   
 }
 
 int main()
@@ -139,14 +164,14 @@ int main()
         case 1:
             cout<<"\nEnter the number of records to input: ";
             cin>>num;
-            student.getData(s,num);
+            student.getData(num);
             break;
         
         case 2:
-            student.printData(s,num);
+            student.printData();
             break;
         case 3:
-            student.searchStudent(s,num);
+            student.searchStudent();
             break;
         default:
             puts("Invalid Choice");
