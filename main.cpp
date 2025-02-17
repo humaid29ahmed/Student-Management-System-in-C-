@@ -1,189 +1,297 @@
 #include<iostream>
-#include<string>
-#include<vector>
+#include<stdlib.h>
+#include<cstring>
+#include<conio.h>
 #include<fstream>
-#include<sstream>
 
 using namespace std;
+
 class Student
 {
     int _rollno;
-    string _name;
-    double _subjects[3];
+    char _name[50];
+    double _marks[3];
+
     public:
-       
         Student()
         {
             _rollno = 0;
-            _name = "abc";
-            _subjects[3] = {0.0};
+            strcpy(_name, "My Name");
+            _marks[3] = {0.0};
         }
 
-        Student(const int& rollno, const string& name, double arr[3])
+        void showStudentData()
         {
-            _rollno = rollno;
-            _name = name;
-            for(int i=0; i<3; i++)
+            cout<<"\n"<<_rollno<<" | "<<_name<<" | "<<_marks[0]<<" | "<<_marks[1]<<" | "<<_marks[2];
+        }
+
+        void getStudentData()
+        {
+            string subjects[3] = {"Physics", "Chemistry", "Math"};
+            cout<<"Enter the rollno : ";
+            cin>>_rollno;
+            cout<<"\nEnter the Name :";
+            cin.ignore();
+            cin.getline(_name, 50);
+            cout<<"\nEnter your marks : ";
+            for(int i =0; i<3;i++)
             {
-                _subjects[i] = arr[i];
+                cout<<"\nEnter the "<<subjects[i]<<" marks : ";
+                cin>>_marks[i];
             }
-            
-        }
-        void setName(string name)
-        {
-           _name = name;
+
         }
 
-        void setRollno(int rollno)
-        {
-            _rollno = rollno;
-        }
-
-        void setSubjects(double arr[])
-        {
-            for(int i=0; i<3; i++)
-            {
-                _subjects[i] = arr[i];
-            }
-        }
-
-        void printData();
-        void getData(int num);
-        void searchStudent();
-
+        void storeStudentRecord();
+        void viewAllStudentsRecord();
+        void searchStudentRecord(int);
+        void getStudentPercentage(int);
+        void deleteStudentRecord(int);
+        void updateStudentRecord(int);
 
 };
 
-
-void Student::getData( int num)
+void Student::storeStudentRecord()
 {
-    fstream fout;
-    fout.open("StudentData.txt",ios::app | ios::out | ios::in);
+    ofstream fout;
+    fout.open("Student.txt", ios::app);
     if(!fout)
     {
-        cout<<"File failed to create!\n";
+        cout<<"File failed to Open!";
     }
-    Student stud;
-    int rollno;
-    string name;
-    string subjects[3] = {"Physics", "Chemistry", "Math"};
-    double arr[3];
-    
-
-    for(int i = 0; i<num; i++)
+    else
     {
-        cout<<"\nEnter the Rollno: ";
-        cin>>rollno;
-        cin.ignore();
-        cout<<"\nEnter the name: ";
-        getline(cin, name);
-        for(int i=0; i<3; i++)
+        fout.write((char*)this, sizeof(*this));
+        fout.close();
+    }
+}
+
+void Student::viewAllStudentsRecord()
+{
+    ifstream fin;
+    fin.open("Student.txt");
+    if(!fin)
+    {
+        cout<<"Failed to open the file";
+    }
+    else
+    {
+        while(fin.read((char*)this, sizeof(*this)))
         {
-            cout<<"\nEnter marks of "<<subjects[i]<<" : ";
-            cin>>arr[i];
+            showStudentData();
         }
-
-        stud.setName(name);
-        stud.setRollno(rollno);
-        stud.setSubjects(arr);
-
-        fout<<stud._rollno<<"\t"<<stud._name<<"\t\t\t"<<stud._subjects[0]<<"\t"<<stud._subjects[1]<<"\t"<<stud._subjects[2]<<endl;
-
-
-        
+        fin.close();
     }
-    fout.close();
-
 }
 
-
-
-void Student::printData()
+void Student::searchStudentRecord(int rollno)
 {
-    ifstream fin("StudentData.txt");
-    if(!fin.is_open())
+    ifstream fin;
+    int flag =0;
+    fin.open("Student.txt");
+    if(!fin)
     {
-        cerr<<"Error opening the file!";
+        cout<<"Failed to open the file";
     }
-    string record;
-    cout<<"Roll No"<<"\t"<<"Name"<<"\t\t\t"<<"Physics"<<"\t"<<"Chemistry"<<"\t"<<"Math\n";
-    while(getline(fin, record))
+    else
     {
-        cout<<record<<endl;
-    }
-
-    fin.close();
-    
-
-}
-
-void Student::searchStudent()
-{
-    string rollno;
-    cout<<"\nEnter the roll no: ";
-    cin>>rollno;
-    string line;
-    fstream fin("StudentData.txt");
-
-    if(!fin.is_open())
-    {
-        cout<<"Failed to Open the File!\n";
-    }else{
-        while(getline(fin,line))
+        while(fin.read((char*)this, sizeof(*this)))
         {
-            stringstream ss(line);
-            string word;
-            while(ss>>word)
+            if(rollno == _rollno)
             {
-                if(word == rollno)
+                showStudentData();
+                flag = 1;
+            }
+        }
+        if(flag == 0)
+        {
+            cout<<"Record not Found"<<endl;
+        }
+        fin.close();
+    }
+
+}
+
+void Student::getStudentPercentage(int rollno)
+{
+    ifstream fin;
+    int flag =0;
+    fin.open("Student.txt");
+    if(!fin)
+    {
+        cout<<"Failed to open the file";
+    }
+    else
+    {
+        while(fin.read((char*)this, sizeof(*this)))
+        {
+            if(rollno == _rollno)
+            {
+                double percentage = (_marks[0] + _marks[1] + _marks[2])/3.0;
+                cout<<"The percentage of "<<_name<<" : "<<percentage<<" %\n";
+                if(percentage > 40.0)
                 {
-                    cout<<line<<endl;
+                    cout<<"Status: Pass\n";
                 }
+                else
+                {
+                    cout<<"Status: Fail\n";
+                }
+                flag = 1;
+            }
+        }
+        if(flag == 0)
+        {
+            cout<<"Record not Found"<<endl;
+        }
+        fin.close();
+    }
+
+}
+
+void Student::deleteStudentRecord(int rollno)
+{
+    ifstream fin;
+    fin.open("Student.txt");
+
+    if(!fin)
+    {
+        cout<<"File failed to open\n";
+    }
+    else
+    {
+        ofstream fout;
+        fout.open("tempfile.txt");
+
+        if(!fout)
+        {
+            cout<<"Temp File failed to open\n";
+        }
+        else
+        {
+            while(fin.read((char*)this, sizeof(*this)))
+            {
+                if(rollno != _rollno)
+                {
+                    fout.write((char*)this, sizeof(*this));
+                }
+            }
+            fin.close();
+            fout.close();
+            remove("Student.txt");
+            rename("tempfile.txt", "Student.txt");
+        }
+    }
+}
+
+void Student::updateStudentRecord(int rollno)
+{
+    fstream file;
+
+    file.open("Student.txt", ios::in|ios::out);
+    if(!file)
+    {
+        cout<<"File has failed to Open!";
+    }
+    else
+    {
+        while(file.read((char*)this, sizeof(*this)))
+        {
+            if(rollno == _rollno)
+            {
+                file.seekg(-sizeof(*this),ios::cur);
+                getStudentData();
+                file.write((char*)this, sizeof(*this));
                 break;
             }
+        }
+        file.close();
+    }
+
+}
+int menu()
+{
+    int choice;
+    cout<<"\nPress 1 for Add the Student Record.";
+    cout<<"\nPress 2 for Viewing the Student Records.";
+    cout<<"\nPress 3 for Searching a Student Record.";
+    cout<<"\nPress 4 for Deleting a Student Record.";
+    cout<<"\nPress 5 for Updating a Student Record.";
+    cout<<"\nPress 6 for gettting a Student Percentage and result.";
+    cout<<"\nPress 7 for Exit.";
+    cout<<"\nEnter your Choice: ";
+    cin>>choice;
+    return choice;
+}
+int main()
+{
+    Student stud;
+    int rollno;
+    while(1)
+    {
+        system("cls");
+        switch(menu())
+        {
+            case 1:
+                stud.getStudentData();
+                stud.storeStudentRecord();
+                cout<<"\nRecord has been Successfully Added.";
+                cout<<"\nPress any key to Continue";
+                getch();
+            break;
+            case 2:
+                stud.viewAllStudentsRecord();
+                cout<<"\nPress any key to Continue";
+                getch();
+            break;
+            case 3:
+                cout<<"\nEnter the Roll no : ";
+                cin.ignore();
+                cin>>rollno;
+                stud.searchStudentRecord(rollno);
+                cout<<"\nPress any key to Continue";
+                getch();
+            break;
+            case 4:
+                cout<<"\nEnter the Roll no : ";
+                cin.ignore();
+                cin>>rollno;
+                stud.deleteStudentRecord(rollno);
+                cout<<"\nRecord has been Sucessfully deleted.";
+                cout<<"\nPress any key to Continue";
+                getch();
+            break;
+            case 5:
+                cout<<"\nEnter the Roll no : ";
+                cin.ignore();
+                cin>>rollno;
+                stud.updateStudentRecord(rollno);
+                cout<<"\nRecord has been Updated.";
+                cout<<"\nPress any key to Continue";
+                getch();
+            break;
+            case 6:
+                cout<<"\nEnter the Roll no : ";
+                cin.ignore();
+                cin>>rollno;
+                stud.getStudentPercentage(rollno);
+                cout<<"\nPress any key to Continue";
+                getch();
+                break;
+            case 7:
+                cout<<"\nThanks for using the Student Management System.";
+                cout<<"\nPress any key to exit.";
+                getch();
+                exit(0);
+            break;
+            default:
+                cout<<"\nInvalid Choice.";
+                cout<<"\nPress any key to Continue";
+                getch();
+            break;
 
         }
     }
-    fin.close();
-   
-}
 
-int main()
-{
-    Student student;
-    int num;
-    vector<Student> s;
-    char ch = 'y';
-    do{
-        int choice;
-        cout<<"\nPress 1 to Store Data.\nPress 2 to Print Data\nPress 3 to search a record.\n Enter your Choice : ";
-        cin>>choice;
-
-        switch (choice)
-        {
-        case 1:
-            cout<<"\nEnter the number of records to input: ";
-            cin>>num;
-            student.getData(num);
-            break;
-        
-        case 2:
-            student.printData();
-            break;
-        case 3:
-            student.searchStudent();
-            break;
-        default:
-            puts("Invalid Choice");
-        }
-        cout<<"\n Do you want to continue y/n:";
-        cin>>ch;
-
-    }while(ch=='y');
-    
-    
-
-
-    
     return 0;
 }
